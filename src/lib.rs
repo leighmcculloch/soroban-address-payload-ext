@@ -16,11 +16,12 @@
 //! # Example
 //!
 //! ```
-//! use soroban_sdk::{Address, Env};
+//! use soroban_sdk::{Address, Env, String};
 //! use soroban_address_payload_ext::{AddressPayloadExt, AddressPayloadType};
 //!
 //! let env = Env::default();
-//! let address = Address::from_str(&env, "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC");
+//! let address = String::from_str(&env, "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC");
+//! let address = Address::from_string(&address);
 //!
 //! if let Some((payload_type, payload)) = address.payload(&env) {
 //!     match payload_type {
@@ -65,20 +66,22 @@ pub trait AddressPayloadExt {
     /// # Example
     ///
     /// ```
-    /// use soroban_sdk::{Address, BytesN, Env};
+    /// use soroban_sdk::{Address, BytesN, Env, String};
     /// use soroban_address_payload_ext::{AddressPayloadExt, AddressPayloadType};
     ///
     /// let env = Env::default();
     ///
     /// // Contract address (C...)
-    /// let contract_addr = Address::from_str(&env, "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC");
-    /// let (payload_type, payload) = contract_addr.payload(&env).unwrap();
+    /// let address = String::from_str(&env, "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC");
+    /// let address = Address::from_string(&address);
+    /// let (payload_type, payload) = address.payload(&env).unwrap();
     /// assert_eq!(payload_type, AddressPayloadType::ContractHash);
     /// assert_eq!(payload.len(), 32);
     ///
     /// // Account address (G...)
-    /// let account_addr = Address::from_str(&env, "GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ");
-    /// let (payload_type, payload) = account_addr.payload(&env).unwrap();
+    /// let address = String::from_str(&env, "GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ");
+    /// let address = Address::from_string(&address);
+    /// let (payload_type, payload) = address.payload(&env).unwrap();
     /// assert_eq!(payload_type, AddressPayloadType::AccountEd25519PublicKey);
     /// assert_eq!(payload.len(), 32);
     /// ```

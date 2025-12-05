@@ -1,5 +1,5 @@
 use soroban_address_payload_ext::{AddressPayloadExt, AddressPayloadType};
-use soroban_sdk::{bytesn, testutils::EnvTestConfig, Address, BytesN, Env};
+use soroban_sdk::{bytesn, testutils::EnvTestConfig, Address, BytesN, Env, String};
 
 #[test]
 fn test_payload() {
@@ -7,7 +7,7 @@ fn test_payload() {
         capture_snapshot_at_drop: false,
     });
 
-    // Test cases: (address_strkey, expected_type, expected_payload)
+    // Test cases: (address, expected_type, expected_payload)
     let test_cases: [(&str, AddressPayloadType, BytesN<32>); 2] = [
         // Contract address (C...)
         (
@@ -29,8 +29,9 @@ fn test_payload() {
         ),
     ];
 
-    for (address_strkey, expected_type, expected_payload) in test_cases {
-        let address = Address::from_str(&env, address_strkey);
+    for (address, expected_type, expected_payload) in test_cases {
+        let address= String::from_str(&env, address);
+        let address = Address::from_string(&address);
         let (payload_type, payload) = address.payload(&env).unwrap();
         assert_eq!(payload_type, expected_type);
         let payload: BytesN<32> = payload.try_into().unwrap();

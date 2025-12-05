@@ -4,12 +4,29 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
 
 jobs:
-  build:
+  soroban-sdk-versions:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.versions.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get soroban-sdk versions
+        id: versions
+        run: |
+          versions=$(make -s soroban-sdk-versions)
+          echo "matrix=$versions" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: soroban-sdk-versions
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        soroban-sdk-version: ${{ fromJson(needs.soroban-sdk-versions.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: stellar/actions/rust-cache@main
-      - run: cargo build
-      - run: cargo test
+      - run: make build test SOROBAN_SDK_VERSION=${{ matrix.soroban-sdk-version }}
