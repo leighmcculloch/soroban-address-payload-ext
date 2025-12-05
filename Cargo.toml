@@ -8,7 +8,7 @@ readme = "README.md"
 license = "Apache-2.0"
 
 [dependencies]
-soroban-sdk = "*"
+soroban-sdk = ">=20"
 
 [dev-dependencies]
-soroban-sdk = { version = "*", features = ["testutils"] }
+soroban-sdk = { version = ">=20", features = ["testutils"] }
