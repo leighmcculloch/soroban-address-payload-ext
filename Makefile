@@ -2,7 +2,7 @@
 
 # output soroban-sdk versions as json array (for ci)
 sdk-versions:
-	@curl -s 'https://crates.io/api/v1/crates/soroban-sdk/versions' | \
+	@curl -sA 'soroban-address-payload-ext' 'https://crates.io/api/v1/crates/soroban-sdk/versions' | \
 		jq -c '[.versions[].num | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$$")) | select((split(".")[0] | tonumber) >= 20)] | group_by(split(".")[0]) | map(max_by(split(".") | map(tonumber)))'
 
 # Test with a specific soroban-sdk version: make test SDK=23.2.1
