@@ -21,18 +21,24 @@ impl AddressPayloadExt for Address {
         // Decode ScAddress
         let addr_type: BytesN<4> = xdr.slice(0..4).try_into().unwrap_optimized();
         match addr_type.to_array() {
+            // Decode ScAddress::Account
             [0, 0, 0, 0] => {
                 // Decode PublicKey
                 let public_key_type: BytesN<4> = xdr.slice(4..8).try_into().unwrap_optimized();
                 match public_key_type.to_array() {
-                    [0, 0, 0, 0] => Some((
-                        AddressPayloadType::AccountEd25519PublicKey,
-                        xdr.slice(8..40),
-                    )),
+                    // Decode PublicKey::PublicKeyTypeEd25519
+                    [0, 0, 0, 0] => {
+                        let ed25519 = xdr.slice(8..40);
+                        Some((AddressPayloadType::AccountEd25519PublicKey, ed25519))
+                    }
                     _ => None,
                 }
             }
-            [0, 0, 0, 1] => Some((AddressPayloadType::ContractHash, xdr.slice(4..36))),
+            // Decode ScAddress::Contract
+            [0, 0, 0, 1] => {
+                let hash = xdr.slice(4..36);
+                Some((AddressPayloadType::ContractHash, hash))
+            }
             _ => None,
         }
     }
