@@ -1,15 +1,87 @@
+//! Extension trait for extracting the 32-byte payload from a Soroban [`Address`].
+//!
+//! Provides the [`AddressPayloadExt`] trait which adds a [`payload`][AddressPayloadExt::payload]
+//! method to [`Address`] for extracting the underlying 32-byte payload.
+//!
+//! # Payload Types
+//!
+//! - **Contract addresses** (C...) contain a 32-byte contract hash that uniquely identifies the
+//!   contract instance on the network, not to be confused with the contract wasm hash.
+//! - **Account addresses** (G...) contain a 32-byte Ed25519 public key that corresponds to the
+//!   account's master key, that depending on the configuration of that account may or may not be a
+//!   signer of the acccount.
+//!
+//! This library supports all address types as of Stellar Protocol 24.
+//!
+//! # Example
+//!
+//! ```
+//! use soroban_sdk::{Address, Env};
+//! use soroban_address_payload_ext::{AddressPayloadExt, AddressPayloadType};
+//!
+//! let env = Env::default();
+//! let address = Address::from_str(&env, "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC");
+//!
+//! if let Some((payload_type, payload)) = address.payload(&env) {
+//!     match payload_type {
+//!         AddressPayloadType::ContractHash => {
+//!             // 32-byte contract hash
+//!         }
+//!         AddressPayloadType::AccountEd25519PublicKey => {
+//!             // 32-byte ed25519 public key
+//!         }
+//!     }
+//! }
+//! ```
+
 #![no_std]
 use soroban_sdk::unwrap::UnwrapOptimized;
 use soroban_sdk::xdr::ToXdr;
 use soroban_sdk::{Address, Bytes, BytesN, Env};
 
+/// The type of payload contained in an [`Address`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum AddressPayloadType {
+    /// An Ed25519 public key from an account address (G...).
     AccountEd25519PublicKey,
+    /// A contract hash from a contract address (C...).
     ContractHash,
 }
 
+/// Extension trait for extracting the 32-byte payload from an [`Address`].
 pub trait AddressPayloadExt {
+    /// Extracts the 32-byte payload from the address.
+    ///
+    /// Returns the payload type and the raw 32-byte payload:
+    /// - For contract addresses (C...), returns [`AddressPayloadType::ContractHash`]
+    ///   and the 32-byte contract hash.
+    /// - For account addresses (G...), returns [`AddressPayloadType::AccountEd25519PublicKey`]
+    ///   and the 32-byte Ed25519 public key.
+    ///
+    /// Returns `None` if the address type is not recognized. This may occur if
+    /// a new address type has been introduced to the network that this version
+    /// of this library is not aware of.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use soroban_sdk::{Address, BytesN, Env};
+    /// use soroban_address_payload_ext::{AddressPayloadExt, AddressPayloadType};
+    ///
+    /// let env = Env::default();
+    ///
+    /// // Contract address (C...)
+    /// let contract_addr = Address::from_str(&env, "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC");
+    /// let (payload_type, payload) = contract_addr.payload(&env).unwrap();
+    /// assert_eq!(payload_type, AddressPayloadType::ContractHash);
+    /// assert_eq!(payload.len(), 32);
+    ///
+    /// // Account address (G...)
+    /// let account_addr = Address::from_str(&env, "GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ");
+    /// let (payload_type, payload) = account_addr.payload(&env).unwrap();
+    /// assert_eq!(payload_type, AddressPayloadType::AccountEd25519PublicKey);
+    /// assert_eq!(payload.len(), 32);
+    /// ```
     fn payload(&self, env: &Env) -> Option<(AddressPayloadType, Bytes)>;
 }
 

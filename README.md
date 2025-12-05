@@ -4,6 +4,15 @@ Extension trait for extracting the 32-byte payload from a Soroban `Address`.
 
 ## Usage
 
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+soroban-address-payload-ext = "1"
+```
+
+Import trait and call in code:
+
 ```rust
 use soroban_sdk::{Address, Env};
 use soroban_address_payload_ext::{AddressPayloadExt, AddressPayloadType};
@@ -22,8 +31,3 @@ if let Some((payload_type, payload)) = address.payload(&env) {
     }
 }
 ```
-
-## Types
-
-- `AddressPayloadType::ContractHash` - Contract address (C...)
-- `AddressPayloadType::AccountEd25519PublicKey` - Account address (G...)
