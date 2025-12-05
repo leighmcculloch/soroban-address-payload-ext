@@ -1,0 +1,15 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: stellar/actions/rust-cache@main
+      - run: cargo build
+      - run: cargo test
