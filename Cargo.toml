@@ -1,0 +1,13 @@
+[package]
+name = "soroban-address-payload-ext"
+version = "0.1.0"
+edition = "2021"
+authors = ["Stellar Development Foundation <info@stellar.org>"]
+readme = "README.md"
+license = "Apache-2.0"
+
+[dependencies]
+soroban-sdk = "*"
+
+[dev-dependencies]
+soroban-sdk = { version = "*", features = ["testutils"] }
