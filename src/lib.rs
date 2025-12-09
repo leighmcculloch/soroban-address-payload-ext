@@ -37,7 +37,7 @@
 
 #![no_std]
 use soroban_sdk::unwrap::UnwrapOptimized;
-use soroban_sdk::xdr::ToXdr;
+use soroban_sdk::xdr::{FromXdr, ToXdr};
 use soroban_sdk::{Address, Bytes, BytesN, Env};
 
 /// The type of payload contained in an [`Address`].
@@ -86,6 +86,31 @@ pub trait AddressPayloadExt {
     /// assert_eq!(payload.len(), 32);
     /// ```
     fn payload(&self, env: &Env) -> Option<(AddressPayloadType, Bytes)>;
+
+    /// Constructs an [`Address`] from a payload type and 32-byte payload.
+    ///
+    /// This is the inverse of [`payload`][AddressPayloadExt::payload].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use soroban_sdk::{Address, Bytes, Env, String, bytes};
+    /// use soroban_address_payload_ext::{AddressPayloadExt, AddressPayloadType};
+    ///
+    /// let env = Env::default();
+    ///
+    /// // Create a contract address from a 32-byte hash
+    /// let hash = bytes!(
+    ///     &env,
+    ///     0xd7928b72c2703ccfeaf7eb9ff4ef4d504a55a8b979fc9b450ea2c842b4d1ce61
+    /// );
+    /// let address = Address::from_payload(&env, AddressPayloadType::ContractHash, &hash);
+    /// assert_eq!(
+    ///     address.to_string().to_string(),
+    ///     "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
+    /// );
+    /// ```
+    fn from_payload(env: &Env, payload_type: AddressPayloadType, payload: &Bytes) -> Address;
 }
 
 impl AddressPayloadExt for Address {
@@ -116,5 +141,25 @@ impl AddressPayloadExt for Address {
             }
             _ => None,
         }
+    }
+
+    fn from_payload(env: &Env, payload_type: AddressPayloadType, payload: &Bytes) -> Address {
+        // Build XDR header based on payload type:
+        let header: &[u8] = match payload_type {
+            AddressPayloadType::AccountEd25519PublicKey => &[
+                0, 0, 0, 18, // ScVal::Address
+                0, 0, 0, 0, // ScAddress::Account
+                0, 0, 0, 0, // PublicKey::PublicKeyTypeEd25519
+            ],
+            AddressPayloadType::ContractHash => &[
+                0, 0, 0, 18, // ScVal::Address
+                0, 0, 0, 1, // ScAddress::Contract
+            ],
+        };
+
+        let mut xdr = Bytes::from_slice(env, header);
+        xdr.append(payload);
+
+        Address::from_xdr(env, &xdr).unwrap_optimized()
     }
 }
