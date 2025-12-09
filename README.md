@@ -1,6 +1,6 @@
 # soroban-address-payload-ext
 
-Extension trait for extracting the 32-byte payload from a Soroban `Address`.
+Extension trait for extracting and constructing Soroban `Address` from raw 32-byte payloads.
 
 > [!WARNING]
 > This library has not been audited for use in production contracts.
@@ -14,7 +14,7 @@ Add to your `Cargo.toml`:
 soroban-address-payload-ext = "1"
 ```
 
-Import trait and call in code:
+### Extracting a payload from an Address
 
 ```rust
 use soroban_sdk::{Address, Env};
@@ -33,4 +33,18 @@ if let Some((payload_type, payload)) = address.payload(&env) {
         }
     }
 }
+```
+
+### Constructing an Address from a payload
+
+```rust
+use soroban_sdk::{Address, Bytes, Env, bytes};
+use soroban_address_payload_ext::{AddressPayloadExt, AddressPayloadType};
+
+let env = Env::default();
+let hash: Bytes = bytes!(
+    &env,
+    0xd7928b72c2703ccfeaf7eb9ff4ef4d504a55a8b979fc9b450ea2c842b4d1ce61
+);
+let address = Address::from_payload(&env, AddressPayloadType::ContractHash, &hash);
 ```
