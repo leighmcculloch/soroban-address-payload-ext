@@ -2,6 +2,9 @@
 
 Extension trait for extracting the 32-byte payload from a Soroban `Address`.
 
+> [!WARNING]
+> This library has not been audited for use in production contracts.
+
 ## Usage
 
 Add to your `Cargo.toml`:
