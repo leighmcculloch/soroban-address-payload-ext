@@ -1,5 +1,8 @@
 # soroban-address-payload-ext
 
+> [!NOTE]
+> The logic in this crate has been merged into the `soroban-sdk` in https://github.com/stellar/rs-soroban-sdk/pull/1640.
+
 Extension trait for extracting and constructing Soroban `Address` from raw 32-byte payloads.
 
 > [!WARNING]
